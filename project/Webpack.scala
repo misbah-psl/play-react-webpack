@@ -8,23 +8,25 @@ object Webpack {
       var process: Option[Process] = None
 
       override def beforeStarted() = {
+        
+        println("Starting webpack")
         process = Option(
-          Process("webpack", base).run()
+          Process("webpack.cmd", base).run
         )
       }
 
-      override def afterStarted(addr: InetSocketAddress) = {
-        process = Option(
-          Process("webpack --watch", base).run()
+    /*  override def afterStarted(addr: InetSocketAddress) = {
+        process = Some(
+          Process("webpack.cmd --watch", base).run
         )
       }
 
       override def afterStopped() = {
-        process.foreach(_.destroy())
+        process.map(p =>p.destroy())
         process = None
       }
+    }*/
     }
-
     WebpackHook
   }
 }

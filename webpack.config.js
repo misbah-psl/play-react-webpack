@@ -34,19 +34,20 @@ var config = {
             },
             {
                 test: /\.scss$/,
-                include: /\/app\/assets/,
                 loader: 'style!css!sass'
             }
         ]
     },
+    sassLoader: {
+        includePaths: [path.resolve(__dirname, '\/app\/assets')]
+    }/*,
     plugins: [
-        //new webpack.optimize.CommonsChunkPlugin('common', 'common.js'),
         new webpack.optimize.UglifyJsPlugin({
             compress: { warnings: false },
-            output: { comments: false }
+            beautify: true
         }),
         new webpack.NoErrorsPlugin()
-    ]
+    ]*/
 };
 
 module.exports = config;

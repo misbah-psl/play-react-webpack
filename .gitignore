@@ -8,3 +8,4 @@ target
 /RUNNING_PID
 app/assets/javascripts/build
 node_modules
+/bin/
