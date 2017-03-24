@@ -16,11 +16,25 @@ import models.Tpcds._
 import play.api.libs.json.JsError
 import scala.util.Failure
 import scala.util.Success
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import play.api.libs.json.JsPath
+import play.api.data.validation.ValidationError
+import reactivemongo.api.commands.WriteResult
+import scala.concurrent.Await
+
+import scala.concurrent.duration._
+import scala.concurrent.duration.Duration.Infinite
+import scala.concurrent.duration.Duration.Infinite
 
 class TpcdsController @Inject() (val reactiveMongoApi: ReactiveMongoApi) extends Controller {
 
+  val log: Logger = LoggerFactory getLogger getClass
+
   def collection: Future[JSONCollection] =
     reactiveMongoApi.database.map(_.collection[JSONCollection]("tpcds"))
+
+  def syncCollection = reactiveMongoApi.db.collection("tpcds")
 
   def index = Action.async { implicit request =>
     val found = collection.map(_.find(Json.obj()).cursor[Tpcds]())
@@ -29,28 +43,45 @@ class TpcdsController @Inject() (val reactiveMongoApi: ReactiveMongoApi) extends
         Ok(Json.toJson(bm))
     }.recover {
       case e =>
+        log.error("Something went wrong", e)
         e.printStackTrace()
         BadRequest(e.getMessage())
     }
   }
 
-  def create = Action(parse.json) { implicit request =>
+  def create = Action.async(parse.json) { implicit request =>
+    val tpcdsResult = request.body.validate[Tpcds]
+    tpcdsResult.fold[Future[Result]](
+      errors => {
+        log.error("Validation failed:" + errors)
+        Future { BadRequest(Json.obj("status" -> "KO", "message" -> JsError.toJson(errors))) }
+      },
+      tpcds => {
+        val response = collection.map(_.insert(tpcds).map[Result](wr => wrToResult(wr)))
+        Await.result(response, scala.concurrent.duration.Duration.Inf)
+      })
+
+  }
+
+  def create_mongo_old_api = Action.async(parse.json) { implicit request =>
     val tpcdsResult = request.body.validate[Tpcds]
     tpcdsResult.fold(
       errors => {
-        BadRequest(Json.obj("status" -> "KO", "message" -> JsError.toJson(errors)))
+        log.error("Validation failed:" + errors)
+        Future{ BadRequest(Json.obj("status" -> "KO", "message" -> JsError.toJson(errors))) } 
       },
       tpcds => {
-        val wr = collection.map(_.insert(tpcds))
-        wr.onComplete {
-          case Failure(e) => e.printStackTrace()
-          case Success(writeResult) =>
-            println(s"successfully inserted document with result: $writeResult")
-            Ok(Json.obj("status" -> "OK", "message" -> ("Place '" + tpcds.name + "' saved.")))
-        }
-
+        val response = syncCollection.insert(tpcds)
+        response.map(wrToResult)
       })
-    Ok("Got request [ " + request + " ]")
+  }
+  
+  def wrToResult(wr: WriteResult): Result = {
+    if (wr.hasErrors) {
+      BadRequest("Something went wrong")
+    } else {
+      Ok(wr.n + " Rows updated")
+    }
   }
 
   def read(id: String) = TODO

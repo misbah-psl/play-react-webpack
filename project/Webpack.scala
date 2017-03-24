@@ -15,17 +15,22 @@ object Webpack {
         )
       }
 
-    /*  override def afterStarted(addr: InetSocketAddress) = {
+      /*override def afterStarted(addr: InetSocketAddress) = {
         process = Some(
           Process("webpack.cmd --watch", base).run
         )
+        println("Started webpack.cmd --watch for "+base)
       }
 
       override def afterStopped() = {
-        process.map(p =>p.destroy())
-        process = None
-      }
-    }*/
+        process.map(p =>{
+                        println("killing "+p)
+                        p.destroy()
+                        var x = p.exitValue()
+                        println("Exited with value "+x)
+            })
+      }*/
+    
     }
     WebpackHook
   }

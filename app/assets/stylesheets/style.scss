@@ -3,5 +3,12 @@ html {
 
   body {
     background-color: $primary-color;
+    border-width: 1px;
+    border-color: black;
+  }
+  
+  ul {
+    background-color: green;
+    border: 1px solid black;
   }
 }

@@ -14,15 +14,15 @@ class TPCDS extends React.Component{
 		axios.get("/api/t_benchmarks",
 				{headers: {'Content-Type': 'application/json'}})
 		.then(res=>{
-			console.log(res);
-			console.log(res.data);
+			//console.log(res);
+			//console.log(res.data);
 			this.setState({bm_data: res.data});
 		});
 	}
 	
 	render(){
 		return(<div> 
-				   <ul>
+				   <ul style={{border:1+'px'}}>
         {
         this.state.bm_data.map((bm,index) =>
           <li key={index}><BmRow bm_row={bm} /></li>
