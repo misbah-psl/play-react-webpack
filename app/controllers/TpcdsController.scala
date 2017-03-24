@@ -49,6 +49,20 @@ class TpcdsController @Inject() (val reactiveMongoApi: ReactiveMongoApi) extends
     }
   }
 
+  
+  def create_exp = Action.async(parse.json) { implicit request =>
+    val tpcdsResult = request.body.validate[Tpcds]
+    tpcdsResult.fold[Future[Result]](
+      errors => {
+        log.error("Validation failed:" + errors)
+        Future { BadRequest(Json.obj("status" -> "KO", "message" -> JsError.toJson(errors))) }
+      },
+      tpcds => {
+        collection.flatMap(_.insert(tpcds).map[Result](wr => wrToResult(wr)))
+      })
+  }
+
+  
   def create = Action.async(parse.json) { implicit request =>
     val tpcdsResult = request.body.validate[Tpcds]
     tpcdsResult.fold[Future[Result]](
