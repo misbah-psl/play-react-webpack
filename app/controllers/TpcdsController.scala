@@ -26,6 +26,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.duration.Duration.Infinite
 import scala.concurrent.duration.Duration.Infinite
+import reactivemongo.bson.BSONDocument
 
 class TpcdsController @Inject() (val reactiveMongoApi: ReactiveMongoApi) extends Controller {
 
@@ -37,7 +38,9 @@ class TpcdsController @Inject() (val reactiveMongoApi: ReactiveMongoApi) extends
   def syncCollection = reactiveMongoApi.db.collection("tpcds")
 
   def index = Action.async { implicit request =>
-    val found = collection.map(_.find(Json.obj()).cursor[Tpcds]())
+    val found = collection.map(_.find(Json.obj())
+        .sort(Json.obj("date" -> -1))
+        .cursor[Tpcds]())
     found.flatMap(_.collect[List]()).map {
       bm =>
         Ok(Json.toJson(bm))

@@ -10,4 +10,4 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 
 GET        /api/t_benchmarks         controllers.TpcdsController.index
 GET        /api/t_benchmark/:id      controllers.TpcdsController.read(id: String)
-POST       /api/t_benchmark          controllers.TpcdsController.create_mongo_old_api
+POST       /api/t_benchmark          controllers.TpcdsController.create_exp
