@@ -25,15 +25,20 @@
   },
   "homepage": "https://github.com/nouhoum/play-react-webpack#readme",
   "dependencies": {
+    "@types/react": "^15.0.20",
+    "@types/react-dom": "^0.14.23",
     "axios": "^0.15.3",
     "bootstrap": "^3.3.7",
+    "inversify": "^3.3.0",
     "lodash": "^4.17.4",
     "react": "^15.4.2",
     "react-bootstrap": "^0.30.8",
     "react-bootstrap-table": "^3.1.1",
-    "react-dom": "^15.4.2"
+    "react-dom": "^15.4.2",
+    "reflect-metadata": "^0.1.10"
   },
   "devDependencies": {
+    "awesome-typescript-loader": "^3.1.2",
     "babel-core": "^6.4.0",
     "babel-loader": "^6.2.1",
     "babel-plugin-react-require": "^2.1.0",
@@ -46,7 +51,9 @@
     "jsx-loader": "^0.13.2",
     "node-sass": "^3.4.2",
     "sass-loader": "^3.1.2",
+    "source-map-loader": "^0.2.0",
     "style-loader": "^0.13.0",
+    "typescript": "^2.2.2",
     "webpack": "^1.12.10"
   }
 }

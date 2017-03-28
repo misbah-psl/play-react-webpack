@@ -1,8 +1,8 @@
-import React from 'react';
+import * as  React from 'react';
 import axios from 'axios';
-import flatten from 'lodash/flatten';
-import uniq from 'lodash/uniq';
-
+import {flatten,uniq} from 'lodash';
+//import uniq from 'lodash/uniq';
+import { BootstrapTable, TableHeaderColumn} from 'react-bootstrap-table';
    function formatLoads(workloads,row){
        //console.log(row)
         return <span>{workloads.map((workload) => <div key={workload.name}> {workload.name}
@@ -12,29 +12,29 @@ import uniq from 'lodash/uniq';
        return new Date(date).toISOString().slice(0, 10);
        }
 
-class TPCDS extends React.Component{
-	constructor(props){
-		super(props)
-		
-		this.state = {
-			bm_data : [],
+export class TPCDS extends React.Component<any,any>{
+    constructor(props:any){
+        super(props)
+        
+        this.state = {
+            bm_data : [],
             load_names: []
-		};
-	}
-	
+        };
+    }
+    
      getBenchMarks(){
         
         return axios.get("/api/t_benchmarks",
                 {headers: {'Content-Type': 'application/json'}});
         }
     
-	componentDidMount(){
-		
-		this.getBenchMarks().then(res=>{
+    componentDidMount(){
+        
+        this.getBenchMarks().then(res=>{
             let all_wl = res.data.map(a => a.workloads.map(wl => wl.name))
             let load_names = uniq(flatten(all_wl))
             console.log(load_names)
-			
+            
             let mod_data  = res.data.map(row =>{ row.workloads.map(workload => workload.metrics.map(metric => { row[metric.name+workload.name] = metric.value}))
             return row
             });
@@ -42,12 +42,12 @@ class TPCDS extends React.Component{
             console.log(mod_data)
             this.setState({bm_data: mod_data});
             this.setState({load_names: load_names})
-		});
-	}
-	
-	render(){
+        });
+    }
     
-		return(
+    render(){
+    
+        return(
            <div>
                 <BootstrapTable data={this.state.bm_data}  keyField='date' striped>
                     <TableHeaderColumn tdStyle={ { 'width': '150px' } } thStyle={ { 'width': '150px' } }  row='0' rowSpan='2' dataField='name'>Benchmark Name</TableHeaderColumn>
@@ -64,7 +64,7 @@ class TPCDS extends React.Component{
                 </BootstrapTable>
           </div>
             );
-	}
+    }
     
     
  
