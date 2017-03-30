@@ -1,6 +1,8 @@
 import * as  React from 'react';
-import axios from 'axios';
 import {flatten,uniq} from 'lodash';
+import container from "../inversify.config";
+import BenchmarkService from "../services/benchmark_service";
+import SERVICE_IDENTIFIER from "../constants/identifiers";
 
 import { BootstrapTable, TableHeaderColumn} from 'react-bootstrap-table';
    function formatLoads(workloads,row){
@@ -8,12 +10,15 @@ import { BootstrapTable, TableHeaderColumn} from 'react-bootstrap-table';
         return <span>{workloads.map((workload) => <div key={workload.name}> {workload.name}
             </div> )}</span>
         }
-   function shortDate(date,row){
+   function shortDate(date:string,row){
        
        return new Date(date).toISOString().slice(0, 10);
        }
 
 export class TPCDS extends React.Component<any,any>{
+    
+    
+    
     constructor(props:any){
         super(props)
         
@@ -24,9 +29,8 @@ export class TPCDS extends React.Component<any,any>{
     }
     
      getBenchMarks(){
-        
-        return axios.get("/api/t_benchmarks",
-                {headers: {'Content-Type': 'application/json'}});
+        let bm_service = container.get<BenchmarkService>(SERVICE_IDENTIFIER.BM_SERVICE);
+        return bm_service.getBenchmarks();
         }
     
     componentDidMount(){
@@ -47,16 +51,17 @@ export class TPCDS extends React.Component<any,any>{
     }
     
     render(){
-    
+        
+        
         return(
            <div>
                 <BootstrapTable data={this.state.bm_data}  keyField='date' striped>
                     <TableHeaderColumn tdStyle={ { 'width': '150px' } } thStyle={ { 'width': '150px' } }  row='0' rowSpan='2' dataField='name'>Benchmark Name</TableHeaderColumn>
-                    <TableHeaderColumn tdStyle={ { 'width': '150px' } } thStyle={ { 'width': '150px' } } row='0' rowSpan='2' dataField='date' >Date</TableHeaderColumn>
+                    <TableHeaderColumn tdStyle={ { 'width': '150px' } } thStyle={ { 'width': '150px' } } row='0' rowSpan='2' dataField='date' dataFormat={shortDate} >Date</TableHeaderColumn>
                     <TableHeaderColumn tdStyle={ { 'width': '150px' } } thStyle={ { 'width': '150px' } } row='0' rowSpan='2' dataField='git_url' > repo url</TableHeaderColumn>
 
               {this.state.load_names.map(
-                       function(name) { return [<TableHeaderColumn  row='0' colSpan='4' tdStyle={ { 'width': '400px' } } thStyle={ { 'width': '400px' } } >{name}</TableHeaderColumn>,
+                       function(name:string) { return [<TableHeaderColumn  row='0' colSpan='4' tdStyle={ { 'width': '400px' } } thStyle={ { 'width': '400px' } } >{name}</TableHeaderColumn>,
                             <TableHeaderColumn  tdStyle={ { 'width': '100px' } } thStyle={ { 'width': '100px' } }  dataField={"minTimeMs"+name} row='1'>min-time</TableHeaderColumn>,
                             <TableHeaderColumn tdStyle={ { 'width': '100px' } } thStyle={ { 'width': '100px' } } dataField={"maxTimeMs"+name} row='1'>max-time</TableHeaderColumn>,
                             <TableHeaderColumn tdStyle={ { 'width': '100px' } } thStyle={ { 'width': '100px' } } dataField={"avgTimeMs"+name} row='1'>avg-time</TableHeaderColumn>,

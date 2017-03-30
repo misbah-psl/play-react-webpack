@@ -7,7 +7,10 @@ import "reflect-metadata";
 import Battle from "./interfaces/battle";
 import EpicBattle from "./interfaces/epic_battle";
 import SERVICE_IDENTIFIER from "./constants/identifiers";
+import BenchmarkService from "./services/benchmark_service";
+import TpcdsBenchmarkService from "./services/tpcds_benchmark_service";
 
 let container = new Container();
 container.bind<Battle>(SERVICE_IDENTIFIER.BATTLE).to(EpicBattle);
+container.bind<BenchmarkService>(SERVICE_IDENTIFIER.BM_SERVICE).to(TpcdsBenchmarkService);
 export default container;
