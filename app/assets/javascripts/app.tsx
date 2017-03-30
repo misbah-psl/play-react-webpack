@@ -15,6 +15,6 @@ import 'react-bootstrap-table/dist/react-bootstrap-table-all.min.css'
 ReactDOM.render((
     <div>
         <h1>CI Performance Benchmark Dashboard</h1>
-    <Greeter name="Mahesh" />
+    <Greeter name="Something" />
     <TPCDS />
     </div>), document.getElementById("app"));

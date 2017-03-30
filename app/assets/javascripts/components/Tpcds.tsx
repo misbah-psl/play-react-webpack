@@ -1,7 +1,7 @@
 import * as  React from 'react';
 import axios from 'axios';
 import {flatten,uniq} from 'lodash';
-//import uniq from 'lodash/uniq';
+
 import { BootstrapTable, TableHeaderColumn} from 'react-bootstrap-table';
    function formatLoads(workloads,row){
        //console.log(row)
@@ -9,6 +9,7 @@ import { BootstrapTable, TableHeaderColumn} from 'react-bootstrap-table';
             </div> )}</span>
         }
    function shortDate(date,row){
+       
        return new Date(date).toISOString().slice(0, 10);
        }
 
