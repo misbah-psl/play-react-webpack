@@ -6,6 +6,8 @@ import { Container } from "inversify";
 import "reflect-metadata";
 import Battle from "./interfaces/battle";
 import EpicBattle from "./interfaces/epic_battle";
+import SERVICE_IDENTIFIER from "./constants/identifiers";
+
 let container = new Container();
-container.bind<Battle>("Batle").to(EpicBattle);
+container.bind<Battle>(SERVICE_IDENTIFIER.BATTLE).to(EpicBattle);
 export default container;
