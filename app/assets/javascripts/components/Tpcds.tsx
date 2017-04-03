@@ -6,7 +6,6 @@ import SERVICE_IDENTIFIER from "../constants/identifiers";
 
 import { BootstrapTable, TableHeaderColumn} from 'react-bootstrap-table';
    function formatLoads(workloads,row){
-       //console.log(row)
         return <span>{workloads.map((workload) => <div key={workload.name}> {workload.name}
             </div> )}</span>
         }
@@ -14,6 +13,8 @@ import { BootstrapTable, TableHeaderColumn} from 'react-bootstrap-table';
        
        return new Date(date).toISOString().slice(0, 10);
        }
+       
+export const Loader = () => <div className="loader">Loading...</div>
 
 export class TPCDS extends React.Component<any,any>{
     
@@ -24,7 +25,8 @@ export class TPCDS extends React.Component<any,any>{
         
         this.state = {
             bm_data : [],
-            load_names: []
+            load_names: [],
+            loading: true
         };
     }
     
@@ -34,7 +36,7 @@ export class TPCDS extends React.Component<any,any>{
         }
     
     componentDidMount(){
-        
+        this.setState({loading: true}) 
         this.getBenchMarks().then(res=>{
             let all_wl = res.data.map(a => a.workloads.map(wl => wl.name))
             let load_names = uniq(flatten(all_wl))
@@ -47,12 +49,15 @@ export class TPCDS extends React.Component<any,any>{
             console.log(mod_data)
             this.setState({bm_data: mod_data});
             this.setState({load_names: load_names})
+            this.setState({loading: false})
         });
     }
     
     render(){
-        
-        
+        if(this.state.loading){
+            return (<Loader/>)
+        }
+        console.log("Size is" + this.state.bm_data.length);
         return(
            <div>
                 <BootstrapTable data={this.state.bm_data}  keyField='date' striped>

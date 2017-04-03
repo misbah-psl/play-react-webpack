@@ -6,7 +6,7 @@ import Battle from "./battle";
 class EpicBattle implements Battle {
 
     public fight() {
-        let desc = 'fight fight fight!!';
+        let desc = 'Epic Battle';
         return desc;
     }
 
