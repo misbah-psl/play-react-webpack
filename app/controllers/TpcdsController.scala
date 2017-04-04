@@ -1,5 +1,6 @@
 package controllers
 import play.api._
+
 import play.api.mvc._
 import play.modules.reactivemongo.ReactiveMongoApi
 import javax.inject.Inject
@@ -27,6 +28,10 @@ import scala.concurrent.duration._
 import scala.concurrent.duration.Duration.Infinite
 import scala.concurrent.duration.Duration.Infinite
 import reactivemongo.bson.BSONDocument
+import reactivemongo.bson.BSONString
+import play.api.libs.json.JsValue
+
+
 
 class TpcdsController @Inject() (val reactiveMongoApi: ReactiveMongoApi) extends Controller {
 
@@ -94,13 +99,48 @@ class TpcdsController @Inject() (val reactiveMongoApi: ReactiveMongoApi) extends
   }
   
   def wrToResult(wr: WriteResult): Result = {
-    if (wr.hasErrors) {
-      BadRequest("Something went wrong")
-    } else {
+    if (wr.ok) {
       Ok(wr.n + " Rows updated")
+    } else {
+      BadRequest(wr.writeErrors.mkString(","))
     }
   }
+  
+  def graph = Action.async{ implicit request =>
+    val x = collection.flatMap(aggregateValues(_))
+    x.map( a => Ok(Json.toJson(a))) 
+  }
 
+  /*
+   *  db.tpcds.aggregate([{$unwind:"$workloads"},
+		{$unwind:"$workloads.metrics"},
+		{$group:{_id:{date:"$date",name:"$workloads.metrics.name"},average:{$avg:"$workloads.metrics.value"}}},
+		{$sort:{_id:1}}])
+   * 
+   * */
+  def aggregateValues(col:JSONCollection) = {
+    import col.BatchCommands.AggregationFramework.{AggregationResult, 
+      Group, 
+      AvgField,
+      UnwindField,
+      Sort}
+    
+    //JSON object with two fields date and name, with respective $ values 
+    val groupByIdentifier =  
+        Json.obj(  "date" -> JsString("$date"),  
+                  "name" -> JsString("$workloads.metrics.name")
+        )
+    //this api takes two parameters, first is the first operator in the pipeline
+    //the second is a list of the remaining parameters.
+    val res: Future[AggregationResult] = col.aggregate(
+      UnwindField("workloads"),
+      List( UnwindField("workloads.metrics"),
+          Group(groupByIdentifier)("average"-> AvgField("workloads.metrics.value"))
+      )
+    )
+    res.map(_.firstBatch)
+  }
+  
   def read(id: String) = TODO
 
   def update(id: String) = TODO

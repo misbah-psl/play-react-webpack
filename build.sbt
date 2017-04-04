@@ -15,7 +15,7 @@ libraryDependencies ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "org.reactivemongo" %% "play2-reactivemongo" % "0.11.14"
+  "org.reactivemongo" %% "play2-reactivemongo" % "0.12.1"
 )
 
 PlayKeys.playRunHooks += Webpack(baseDirectory.value)

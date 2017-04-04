@@ -14,7 +14,7 @@ case class Tpcds(name: String,
                  master: String,
                  workloads: Seq[Workload])
 case class Workload(name: String, metrics: Seq[Metric])
-case class Metric(name: String, value: String)
+case class Metric(name: String, value: Float)
 
 object Tpcds {
 
