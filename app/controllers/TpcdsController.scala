@@ -31,6 +31,7 @@ import reactivemongo.bson.BSONDocument
 import reactivemongo.bson.BSONString
 import play.api.libs.json.JsValue
 import reactivemongo.api.SortOrder
+import reactivemongo.api.Cursor
 
 
 
@@ -44,13 +45,15 @@ class TpcdsController @Inject() (val reactiveMongoApi: ReactiveMongoApi) extends
   def syncCollection = reactiveMongoApi.db.collection("tpcds")
 
   def index = Action.async { implicit request =>
+   
     val found = collection.map(_.find(Json.obj())
         .sort(Json.obj("date" -> -1))
-        .cursor[Tpcds]())
-    found.flatMap(_.collect[List]()).map {
-      bm =>
-        Ok(Json.toJson(bm))
-    }.recover {
+        .cursor[Tpcds]()
+        .collect(-1, Cursor.FailOnError[List[Tpcds]]())
+        )
+ 
+    found.flatMap(benchMarks => benchMarks.map(bmList => Ok(Json.toJson(bmList))))    
+    .recover {
       case e =>
         log.error("Something went wrong", e)
         e.printStackTrace()
@@ -86,6 +89,12 @@ class TpcdsController @Inject() (val reactiveMongoApi: ReactiveMongoApi) extends
 
   }
 
+  /**
+   * this method is kept here to show 
+   * how to use old api, most examples on the internet
+   * use this api so if one cannot do using new aysnch api.
+   * The synchronous api is always an option 
+   */
   def create_mongo_old_api = Action.async(parse.json) { implicit request =>
     val tpcdsResult = request.body.validate[Tpcds]
     tpcdsResult.fold(
@@ -113,10 +122,12 @@ class TpcdsController @Inject() (val reactiveMongoApi: ReactiveMongoApi) extends
   }
 
   /*
+   * Method that implements below query
    *  db.tpcds.aggregate([{$unwind:"$workloads"},
 		{$unwind:"$workloads.metrics"},
 		{$group:{_id:{date:"$date",name:"$workloads.metrics.name"},average:{$avg:"$workloads.metrics.value"}}},
-		{$sort:{_id:1}}])
+		{$sort:{"_id.date":1}}])
+		
    * 
    * */
   def aggregateValues(col:JSONCollection) = {
