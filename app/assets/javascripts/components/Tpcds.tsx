@@ -5,10 +5,6 @@ import BenchmarkService from "../services/benchmark_service";
 import SERVICE_IDENTIFIER from "../constants/identifiers";
 
 import { BootstrapTable, TableHeaderColumn} from 'react-bootstrap-table';
-   function formatLoads(workloads,row){
-        return <span>{workloads.map((workload) => <div key={workload.name}> {workload.name}
-            </div> )}</span>
-        }
    function shortDate(date:string,row){
        
        return new Date(date).toISOString().slice(0, 10);
