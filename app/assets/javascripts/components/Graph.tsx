@@ -1,46 +1,28 @@
 import * as  React from 'react';
 import ChartistGraph from 'react-chartist'
 import * as Legend from 'chartist-plugin-legend';
+import {flatten,uniq} from 'lodash';
+import container from "../inversify.config";
+import BenchmarkService from "../services/benchmark_service";
+import SERVICE_IDENTIFIER from "../constants/identifiers";
+import 'bootstrap/dist/css/bootstrap.css';
+var chartistPluginTooltip = require("chartist-plugin-tooltip");
 
-
- var data = {
-  labels: ['1/1/2016', '1/2/2016', '1/3/2016', '1/4/2016', '1/5/2016', '1/6/2016'],
-  series: [
-    {"name":"metric1", "data":[78, 90, 250, 50, 5, 100]},
-    {"name":"metric2","data":[300, 201, 100, 150, 190, 6]},
-    {"name":"metric3","data":[210, 100, 30, 90, 67, 95]}
+var options = {
+  width:'900px',
+  height:'400px',
+  showPoint: false,
+  lineSmooth: false,
+  axisX: {},
+  axisY: {
+    offset: 60   
+  },
+  plugins: [
+     Legend({legendNames:["avgTimeMs","maxTimeMs","minTimeMs","stdDev"]}),
+	 chartistPluginTooltip()
   ]
 };
 
-var options = {
-	width:'900px',
-	height:'400px',
-  // Don't draw the line chart points
-  showPoint: false,
-  // Disable line smoothing
-  lineSmooth: false,
-  // X-Axis specific configuration
-  axisX: {
-    // We can disable the grid for this axis
-
-    // and also don't show the label
-  },
-  // Y-Axis specific configuration
-  axisY: {
-    // Lets offset the chart a bit from the labels
-    offset: 60
-    // The label interpolation function enables you to modify the values
-    // used for the labels on each axis. Here we are converting the
-    // values into million pound.
-    
-  },
-
-   plugins: [
-     Legend({
-            legendNames: ['metric1', 'metric2', 'metric3']
-        })
-    ]
-};
 var responsiveOptions = [
   ['screen and (min-width: 641px) and (max-width: 1024px)', {
     showPoint: false,
@@ -60,6 +42,48 @@ var responsiveOptions = [
   }]
 ];
 
-export const Graph = () => {
-    return (<div> <h1>Title</h1> <ChartistGraph data={data} type={'Line'} options={options} responsiveOptions={responsiveOptions} /></div>);
+export class Graph extends React.Component<any,any>{
+	constructor(props:any){
+        super(props)       
+        this.state = {
+            data : {}			
+        };
+    }
+	getBenchMarks(){
+		let bm_service = container.get<BenchmarkService>(SERVICE_IDENTIFIER.BM_SERVICE);
+		return bm_service.getBenchmarksGraphs();
+	}
+	formatDate(date){
+		var d = new Date(date); 
+		return d.toLocaleDateString()
+	}   
+    componentDidMount(){
+		let series =[];
+        this.setState({loading: true}) 
+        this.getBenchMarks().then(res=>{
+			
+		let all_date = res.data.map(metric=>{ return this.formatDate(metric._id.date)});
+		let x_Axis_labels = uniq(flatten(all_date));
+		let metric_name = uniq(flatten(res.data.map(metric=>metric._id.name)));
+		let that = this;
+		var series =[];
+				 			 				
+		metric_name.forEach(function(names,index){
+			 var d = [];			 
+			 x_Axis_labels.forEach(function(dates){
+				res.data.forEach(function(metric){	
+					if((that.formatDate(metric._id.date) == dates) && (metric._id.name == names)){ 								
+							d.push(metric.average)
+					} 								  
+				});	
+					
+			});
+			series.push(d);		
+		}); 		
+			this.setState({data:{ labels:x_Axis_labels, series:series}});
+		});
+    }
+	render(){
+		return (<div> <h1>Title</h1> <ChartistGraph data={this.state.data} type={'Line'} options={options} responsiveOptions={responsiveOptions} /></div>);
+	}
 }
