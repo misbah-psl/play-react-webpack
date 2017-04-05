@@ -26,7 +26,7 @@ class TheApp extends React.Component<any,any>{
     render(){
         return (
         <BrowserRouter>
-        <div>
+        <div className="nav">
         <ul>
             <li> <Link to="/app">Home </Link> </li>
         <li> <Link to="/app/about">About </Link> </li>
