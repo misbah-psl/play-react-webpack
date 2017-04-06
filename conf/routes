@@ -12,5 +12,6 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 
 GET        /api/t_benchmarks         controllers.TpcdsController.index
 GET        /api/t_benchmark/:id      controllers.TpcdsController.read(id: String)
+GET        /api/t_benchmark_date/:date      controllers.TpcdsController.read_by_date(date: String)
 POST       /api/t_benchmark          controllers.TpcdsController.create_exp
 GET        /api/t_benchmarks/graph         controllers.TpcdsController.graph

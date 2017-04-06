@@ -17,8 +17,6 @@ import models.Tpcds._
 import play.api.libs.json.JsError
 import scala.util.Failure
 import scala.util.Success
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import play.api.libs.json.JsPath
 import play.api.data.validation.ValidationError
 import reactivemongo.api.commands.WriteResult
@@ -32,12 +30,13 @@ import reactivemongo.bson.BSONString
 import play.api.libs.json.JsValue
 import reactivemongo.api.SortOrder
 import reactivemongo.api.Cursor
+import org.joda.time.DateTime
 
 
 
 class TpcdsController @Inject() (val reactiveMongoApi: ReactiveMongoApi) extends Controller {
 
-  val log: Logger = LoggerFactory getLogger getClass
+  val log:Logger = Logger(getClass);
 
   def collection: Future[JSONCollection] =
     reactiveMongoApi.database.map(_.collection[JSONCollection]("tpcds"))
@@ -153,6 +152,21 @@ class TpcdsController @Inject() (val reactiveMongoApi: ReactiveMongoApi) extends
       )
     )
     res.map(_.firstBatch)
+  }
+  
+  def read_by_date(date: String) = Action.async{
+    val parsedDate = new DateTime(date);
+    val found = collection.map(_.find(Json.obj("date" -> Json.obj("$regex" -> new JsString(date+".*"))))
+    .cursor[Tpcds]()
+    .collect(-1, Cursor.FailOnError[List[Tpcds]]())
+    )
+    found.flatMap(benchMarks => benchMarks.map(bmList => Ok(Json.toJson(bmList))))    
+    .recover {
+      case e =>
+        log.error("Something went wrong", e)
+        e.printStackTrace()
+        BadRequest(e.getMessage())
+    }   
   }
   
   def read(id: String) = TODO
