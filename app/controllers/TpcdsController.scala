@@ -155,7 +155,6 @@ class TpcdsController @Inject() (val reactiveMongoApi: ReactiveMongoApi) extends
   }
   
   def read_by_date(date: String) = Action.async{
-    val parsedDate = new DateTime(date);
     val found = collection.map(_.find(Json.obj("date" -> Json.obj("$regex" -> new JsString(date+".*"))))
     .cursor[Tpcds]()
     .collect(-1, Cursor.FailOnError[List[Tpcds]]())
