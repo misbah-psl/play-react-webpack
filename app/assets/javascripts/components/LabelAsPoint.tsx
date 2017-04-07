@@ -1,4 +1,5 @@
 import * as  React from 'react';
+import {flatten,uniq} from 'lodash';
 import container from "../inversify.config";
 import BenchmarkService from "../services/benchmark_service";
 import SERVICE_IDENTIFIER from "../constants/identifiers";
@@ -15,19 +16,23 @@ export default class LabelAsPoint extends React.Component <any,any>{
 		let date = this.formatDate(payload.name);
 		this.getBenchMarks(date).then(response=>{	
 			let returnData = [];
-			let all_dates = response.data.map(row=>{ return this.formatDate(row.date)});
-			let metrices = response.data.map(row=> row.workloads.map(workload=>workload.metrics));
+			let all_dates = uniq(response.data.map(row=>row.date));
 			var that = this;
-			all_dates.forEach(function(metric_date){
-				var d = {};
-				d["date"] = metric_date;
-				response.data.forEach(function(data){
-					if(that.formatDate(data.date) == metric_date){					
-						data.workloads.map(workload=>workload.metrics.map(obj=>{ d[obj.name] = obj.value; return;}));
+			response.data.forEach(function(data){
+				all_dates.forEach(function(metric_date){
+					if(data.date == metric_date){											
+						data.workloads.forEach(function(workload){
+							var d = {};
+							d["Date"] = that.formatDate(data.date);
+							d["Query Name"] = workload.name;
+							workload.metrics.forEach(function(metric){
+								d[metric.name]=(metric.value).toFixed(2);							
+							});
+							returnData.push(d);
+						});
 					}				
-				});
-				returnData.push(d);
-			});			
+				});				
+			});	
 			this.props.getTableData(returnData);
 		})
     }
