@@ -16,7 +16,8 @@ export class Graph extends React.Component<any,any>{
             data : {},
 			loading: true,
 			metric_names:[],
-			benchmark_date_json:[]
+			benchmark_date_json:[],
+			col_names:[ "Date","Query Name","stdDev","maxTimeMs","minTimeMs","avgTimeMs"]
         };
     }
 	getBenchMarks(){
@@ -68,8 +69,8 @@ export class Graph extends React.Component<any,any>{
 			this.setState({loading: false});			
 		});
     }
-	handleClickFunc(object){
-		this.setState({benchmark_date_json:object});
+	handleClickFunc(table_data){
+		this.setState({benchmark_date_json:table_data});
 	}
 	
 	render(){
@@ -95,7 +96,7 @@ export class Graph extends React.Component<any,any>{
 				}
 			</LineChart>
 			<br/><br/>			
-			<MetricTable data={this.state.benchmark_date_json} metric_names={this.state.metric_names} />
+			<MetricTable data={this.state.benchmark_date_json} metric_names={this.state.col_names} />
 			</div>
 	  );
 	}

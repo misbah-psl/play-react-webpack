@@ -11,8 +11,7 @@ export class MetricTable extends React.Component<any,any>{
    render(){
 	  return (
 		<div>
-		<BootstrapTable data={this.props.data} keyField='date' striped hover options={ { noDataText: 'No coordinates selected' } } >
-		<TableHeaderColumn dataField="date">Date</TableHeaderColumn>
+		<BootstrapTable data={this.props.data} keyField='Date' striped hover options={ { noDataText: 'No coordinates selected' } } >
 		{
 			
 			this.props.metric_names.map((names,index) => {
