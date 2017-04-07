@@ -13,6 +13,10 @@ class TpcdsBenchmarkService implements BenchmarkService{
         return axios.get("/api/t_benchmarks/graph",
                 {headers: {'Content-Type': 'application/json'}});
     }
+	getBenchmarksOnDates(date){
+		return axios.get("/api/t_benchmark_date/"+date,
+                {headers: {'Content-Type': 'application/json'}});
+	}
 }
 
 export default TpcdsBenchmarkService
