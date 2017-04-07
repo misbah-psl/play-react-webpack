@@ -6,6 +6,7 @@ import SERVICE_IDENTIFIER from "../constants/identifiers";
 import 'bootstrap/dist/css/bootstrap.css';
 import {LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend} from 'recharts';
 import LabelAsPoint from './LabelAsPoint';
+import {MetricTable} from './MetricTable';
 
 export const Loader = () => <div className="loader">Loading...</div>
 export class Graph extends React.Component<any,any>{
@@ -14,7 +15,8 @@ export class Graph extends React.Component<any,any>{
         this.state = {
             data : {},
 			loading: true,
-			metric_names:[]
+			metric_names:[],
+			benchmark_date_json:[]
         };
     }
 	getBenchMarks(){
@@ -23,7 +25,18 @@ export class Graph extends React.Component<any,any>{
 	}
 	formatDate(date){
 		var d = new Date(date); 
-		return d.toLocaleDateString()
+		var year = d.getFullYear();
+		var month = d.getMonth()+1;
+		var dt = d.getDate();
+
+		if (dt < 10) {
+		  dt = '0' + dt;
+		}
+		if (month < 10) {
+		  month = '0' + month;
+		}
+
+		return year + '/' + month + '/' + dt;
 	}   
     componentDidMount(){
 		this.setState({loading: true}) 
@@ -55,11 +68,15 @@ export class Graph extends React.Component<any,any>{
 			this.setState({loading: false});			
 		});
     }
-
+	handleClickFunc(object){
+		this.setState({benchmark_date_json:object});
+	}
+	
 	render(){
 		if(this.state.loading){
             return (<Loader/>)
         }
+		var i = 0;
 		var strokes_fill = ["#8884d8","#ff7300","#82ca9d","#8884d8"];
 		return (
 			<div > 
@@ -72,10 +89,13 @@ export class Graph extends React.Component<any,any>{
 				<Legend />
 				{	
 					this.state.metric_names.map((names) => {
-						return (<Line key = {`line_{names}`} dataKey = {names} activeDot = {false} label = {<LabelAsPoint />} strokeWidth = {4}  />)
+						{i++}
+						return (<Line key = {`line_{names}`} stroke = {strokes_fill[i]} dataKey = {names} activeDot = {false} label = {<LabelAsPoint getTableData={this.handleClickFunc.bind(this)} />} strokeWidth = {4}  />)
 					})		
 				}
 			</LineChart>
+			<br/><br/>			
+			<MetricTable data={this.state.benchmark_date_json} metric_names={this.state.metric_names} />
 			</div>
 	  );
 	}
