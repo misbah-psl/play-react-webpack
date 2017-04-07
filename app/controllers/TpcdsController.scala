@@ -135,7 +135,7 @@ class TpcdsController @Inject() (val reactiveMongoApi: ReactiveMongoApi) extends
       AvgField,
       UnwindField,
       Sort,
-      Descending}
+      Ascending}
     
     //JSON object with two fields date and name, with respective $ values 
     val groupByIdentifier =  
@@ -148,7 +148,7 @@ class TpcdsController @Inject() (val reactiveMongoApi: ReactiveMongoApi) extends
       UnwindField("workloads"),
       List( UnwindField("workloads.metrics"),
           Group(groupByIdentifier)("average"-> AvgField("workloads.metrics.value")),
-          Sort(Descending("_id.date"))
+          Sort(Ascending("_id.date"))
       )
     )
     res.map(_.firstBatch)
