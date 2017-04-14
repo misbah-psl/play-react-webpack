@@ -34,7 +34,7 @@ import org.joda.time.DateTime
 import mongo.aggregation.TpcdsDb
 import mongo.aggregation.TpcdsDb
 import controllers.requests.model.FilterRequest
-
+import reactivemongo.core.commands.RawCommand
 
 
 class TpcdsController @Inject() (val reactiveMongoApi: ReactiveMongoApi) extends Controller {
@@ -162,7 +162,6 @@ class TpcdsController @Inject() (val reactiveMongoApi: ReactiveMongoApi) extends
          x.map( a => Ok(Json.toJson(a)))     
       })
   }
-  
   
   
   def read(id: String) = TODO

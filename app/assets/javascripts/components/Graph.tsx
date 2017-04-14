@@ -8,6 +8,7 @@ import {LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend} from 'rec
 import LabelAsPoint from './LabelAsPoint';
 import {MetricTable} from './MetricTable';
 
+
 export const Loader = () => <div className="loader">Loading...</div>
 export class Graph extends React.Component<any,any>{
 	constructor(props:any){
@@ -17,7 +18,7 @@ export class Graph extends React.Component<any,any>{
 			loading: true,
 			metric_names:[],
 			benchmark_date_json:[],
-			col_names:[ "Date","Query Name","stdDev","maxTimeMs","minTimeMs","avgTimeMs"]
+			col_names:[ "Date","Query Name","stdDev","maxTimeMs","minTimeMs","avgTimeMs"]			
         };
     }
 	getBenchMarks(){
@@ -63,9 +64,11 @@ export class Graph extends React.Component<any,any>{
 					
 			});
 			series.push(d);			
-		}); 		
+		}); 	
+			//console.log(series[0],series[series.length-1])	
+
 			this.setState({data:series});
-			this.setState({metric_names: metric_names});
+			this.setState({metric_names: metric_names});			
 			this.setState({loading: false});			
 		});
     }
@@ -80,9 +83,10 @@ export class Graph extends React.Component<any,any>{
 		var i = 0;
 		var strokes_fill = ["#8884d8","#ff7300","#82ca9d","#8884d8"];
 		return (
-			<div > 
-			<h1>Title</h1> 
-			<LineChart width = {600} height = {300} data = {this.state.data} margin = {{top: 5, right: 30, left: 20, bottom: 5}}>
+			<div  className="chartAlign"> 
+			
+			
+			<LineChart width = {450} height = {250} data = {this.state.data} >
 				<XAxis dataKey = "name"/>
 				<YAxis/>
 				<CartesianGrid strokeDasharray = "3 3"/>
@@ -95,8 +99,9 @@ export class Graph extends React.Component<any,any>{
 					})		
 				}
 			</LineChart>
+			<p className="querNameAlign">q1-1.4</p>
 			<br/><br/>			
-			<MetricTable data={this.state.benchmark_date_json} metric_names={this.state.col_names} />
+			
 			</div>
 	  );
 	}
