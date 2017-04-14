@@ -31,13 +31,18 @@ import play.api.libs.json.JsValue
 import reactivemongo.api.SortOrder
 import reactivemongo.api.Cursor
 import org.joda.time.DateTime
+import mongo.aggregation.TpcdsDb
+import mongo.aggregation.TpcdsDb
+import controllers.requests.model.FilterRequest
 
 
 
 class TpcdsController @Inject() (val reactiveMongoApi: ReactiveMongoApi) extends Controller {
 
   val log:Logger = Logger(getClass);
-
+  
+  val tpcdsDb:TpcdsDb = new TpcdsDb();
+  
   def collection: Future[JSONCollection] =
     reactiveMongoApi.database.map(_.collection[JSONCollection]("tpcds"))
 
@@ -116,7 +121,7 @@ class TpcdsController @Inject() (val reactiveMongoApi: ReactiveMongoApi) extends
   }
   
   def graph = Action.async{ implicit request =>
-    val x = collection.flatMap(aggregateValues(_))
+    val x = collection.flatMap(tpcdsDb.aggregateValuesForTopGraph(_))
     x.map( a => Ok(Json.toJson(a))) 
   }
 
@@ -129,30 +134,7 @@ class TpcdsController @Inject() (val reactiveMongoApi: ReactiveMongoApi) extends
 		
    * 
    * */
-  def aggregateValues(col:JSONCollection) = {
-    import col.BatchCommands.AggregationFramework.{AggregationResult, 
-      Group, 
-      AvgField,
-      UnwindField,
-      Sort,
-      Ascending}
-    
-    //JSON object with two fields date and name, with respective $ values 
-    val groupByIdentifier =  
-        Json.obj(  "date" -> JsString("$date"),  
-                  "name" -> JsString("$workloads.metrics.name")
-        )
-    //this api takes two parameters, first is the first operator in the pipeline
-    //the second is a list of the remaining parameters.
-    val res: Future[AggregationResult] = col.aggregate(
-      UnwindField("workloads"),
-      List( UnwindField("workloads.metrics"),
-          Group(groupByIdentifier)("average"-> AvgField("workloads.metrics.value")),
-          Sort(Ascending("_id.date"))
-      )
-    )
-    res.map(_.firstBatch)
-  }
+  
   
   def read_by_date(date: String) = Action.async{
     val found = collection.map(_.find(Json.obj("date" -> Json.obj("$regex" -> new JsString(date+".*"))))
@@ -167,6 +149,21 @@ class TpcdsController @Inject() (val reactiveMongoApi: ReactiveMongoApi) extends
         BadRequest(e.getMessage())
     }   
   }
+  
+  def read_by_dates_qname = Action.async(parse.json){ implicit request => 
+    val valResult = request.body.validate[FilterRequest]
+    valResult.fold[Future[Result]](
+      errors => {
+        log.error("Validation failed:" + errors)
+        Future { BadRequest(Json.obj("status" -> "KO", "message" -> JsError.toJson(errors))) }
+      },
+      frRequest => {
+         val x = collection.flatMap(tpcdsDb.filterByQnameAndDates(_,frRequest.from_date,frRequest.to_date,frRequest.q_name))
+         x.map( a => Ok(Json.toJson(a)))     
+      })
+  }
+  
+  
   
   def read(id: String) = TODO
 
